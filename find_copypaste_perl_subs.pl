@@ -73,7 +73,7 @@ sub main {
             my $procent2 = $count_equal2 / $count2 * 100;
 
             if ($procent1 > $THRESHOLD_LIMIT && $procent2 > $THRESHOLD_LIMIT) {
-                printf "$sub1 - $sub2 : %02.1f / %02.1f\n", $procent1, $procent2;
+                printf "$sub1 $sub2 - %02.1f / %02.1f\n", $procent1, $procent2;
             }
 
             $already_checked{"$sub1$sub2"}++;
