@@ -4,14 +4,31 @@ use warnings;
 use strict;
 
 use PPI;
+use Getopt::Long;
 
-our %exlude_subs = map {$_ => 1} qw/handler new/;
+our $VERSION = '0.01';
+our %EXLUDE_SUBS = map {$_ => 1} qw/handler new/;
+our $THRESHOLD_LIMIT = 80;
 
 #................................................
 sub main {
     my %all_subs;
 
-    my $limit = shift @ARGV;
+    GetOptions(
+        "limit=i" => \$THRESHOLD_LIMIT,
+        "version" => sub {
+            print "$VERSION\n";
+            exit 0;
+        },
+        "help" => sub {
+            print "$0 [--limit=N] perl file names\n"
+                . "  --limit=N  -- threshold in procent of copied code in subs (default: $THRESHOLD_LIMIT%)\n"
+                . "  --help\n"
+                . "  --version\n"
+                ;
+            exit 0;
+        },
+    );
 
     for my $pm_file (@ARGV) {
         my $perl_doc = PPI::Document->new($pm_file) or next;
@@ -26,7 +43,7 @@ sub main {
             my $sub_text = $node->content() or next;
             my ($name) = $sub_text =~ /sub \s+ (\w+)/x;
             next unless $name;
-            next if $exlude_subs{$name};
+            next if $EXLUDE_SUBS{$name};
 
             my $prev_word = '';
             my %stat = map {
@@ -55,7 +72,7 @@ sub main {
             my $procent1 = $count_equal1 / $count1 * 100;
             my $procent2 = $count_equal2 / $count2 * 100;
 
-            if ($procent1 > $limit && $procent2 > $limit) {
+            if ($procent1 > $THRESHOLD_LIMIT && $procent2 > $THRESHOLD_LIMIT) {
                 printf "$sub1 - $sub2 : %02.1f / %02.1f\n", $procent1, $procent2;
             }
 
